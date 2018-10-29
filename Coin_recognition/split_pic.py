@@ -8,6 +8,9 @@ Created on 2018年10月29日
 import numpy as np
 import cv2
 
+import sys
+sys.setrecursionlimit(10000)
+
 def getPoint(x,y,data,subdata=None):
     """泛洪填充算法
     """

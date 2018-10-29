@@ -7,10 +7,9 @@ Created on 2018年10月29日
 
 import numpy as np
 import cv2
-from PIL import Image
-import matplotlib.pyplot as plt
-import sys
-sys.setrecursionlimit(10000)
+# from PIL import Image
+# import matplotlib.pyplot as plt
+
 pic_path = "coin.jpg"
 
 def pic_show(data):
@@ -29,16 +28,11 @@ def hist():
 #     pic_show(hsv)
     color=('b','g','r')
     
-    for i,col in enumerate(color):
-        print i,col
+    for i,_ in enumerate(color):
         hist=cv2.calcHist([hsv],[i],None,[256],[0,256])
-        print hist
 #         pic_show(hist)
-#     
 #         plt.plot(hist)
-#         
 #         plt.xlim([0,256])
-#         
 #         plt.show()
 
 def colorpic2gray():
@@ -48,25 +42,13 @@ def colorpic2gray():
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     #5×5 内核的高斯平滑
 #     gray = cv2.GaussianBlur(gray, (5, 5), 0)
-#     _, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    _, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     
     
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    
-    #膨胀，腐蚀白色区域
-    
-    
-    while True:
-        cv2.imshow("Image", gray)
-        thresh = cv2.getTrackbarPos('thres', 'Image')
-        img = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY_INV)[1]
-        k = cv2.waitKey(1) & 0xFF
-        if k == ord('q'):
-            break
-    
-    
+    #dilate:膨胀，erode:腐蚀白色区域
     img = thresh
-    
+#     会返回指定形状和尺寸的结构元素
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     while True:
         cv2.imshow("My", img)
         # 键盘检测函数，0xFF是因为64位机器
@@ -88,30 +70,37 @@ def colorpic2gray():
     
     
     #边缘检测 return 所处理的图像, 轮廓的点集,轮廓的索引
-    contours, hierarchy ,opt = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-#     Perimeter=cv2.arcLength(hierarchy,True)
-#     print Perimeter
-    
+    _, hierarchy ,_ = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     for cnt in hierarchy:
-        M = cv2.moments(cnt)
+#         M = cv2.moments(cnt)
         #计算轮廓边长
         Perimeter=cv2.arcLength(cnt,True)
         if Perimeter > 100:
             print Perimeter
-#         cv2.drawContours(img,cnt,-1,(0,0,255),3) 
-#     cv2.imshow("img", img)
-#     cv2.waitKey(0)
-    
-#     pic_show(thresh) 
+ 
 def on_trace_bar_changed(args):
     pass
+
+def cir_find():
+    img = cv2.imread(pic_path)
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    circles = cv2.HoughCircles(gray,cv2.HOUGH_GRADIENT,1,10)
+    circles = np.uint16(np.around(circles))
+    for i in circles[0,:]:
+        # draw the outer circle
+        cv2.circle(gray,(i[0],i[1]),i[2],(0,255,0),2)
+        # draw the center of the circle
+        cv2.circle(gray,(i[0],i[1]),2,(0,0,255),3)
+
+    cv2.imshow('detected circles',gray)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     
 if __name__ == "__main__":
     print "start"
-    cv2.createTrackbar('thres', 'Image', 0, 255, on_trace_bar_changed)
-#     colorpic2gray()
-    thresh = cv2.getTrackbarPos('thres', 'Image')
+    cir_find()
+
     print "finish"
 
     
