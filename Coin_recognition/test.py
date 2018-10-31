@@ -11,6 +11,7 @@ import numpy as np
 from imutils import perspective
 from scipy.spatial import distance as dist
 import time
+import matplotlib.pyplot as plt
 
 from pic_deal import pic_show
 
@@ -37,6 +38,11 @@ def test1():
     img = cv2.dilate(img, None, iterations=1)
     img = cv2.erode(img, None, iterations=1)
     pic_show(img)
+
+#     cv2.imshow('ret',img)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
+
 #     pic_show(img)
 #     #dilate:膨胀，erode:腐蚀白色区域
 #     while True:
@@ -78,6 +84,7 @@ def test1():
         
         for (x, y) in box:
             cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
+            pic_show(orig)
 #             cv2.imshow("My", orig)
      
         (tl, tr, br, bl) = box
@@ -107,7 +114,7 @@ def test1():
 
 #         cv2.imshow("Image", orig)
 #         cv2.waitKey(0)
-        
+        pic_show(orig)
         cv2.imwrite("cat2_%s.jpg"%i, orig)
         i += 1
 

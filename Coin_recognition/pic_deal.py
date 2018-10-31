@@ -10,11 +10,20 @@ from imutils import contours
 from imutils import perspective
 import cv2
 import imutils
+from threading import Thread
 # from PIL import Image
 # import matplotlib.pyplot as plt
 
 pic_path = "coin.jpg"
 
+def async(f):
+    def wrapper(*args, **kwargs):
+        thr = Thread(target = f, args = args, kwargs = kwargs)
+        thr.start()
+    return wrapper
+
+
+@async
 def pic_show(data):
     """显示图片
     """
