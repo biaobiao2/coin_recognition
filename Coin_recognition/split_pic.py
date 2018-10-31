@@ -5,10 +5,12 @@ Created on 2018年10月29日
 @author: liushouhua
 '''
 
-import numpy as np
 import cv2
-
 import sys
+import numpy as np
+from PIL import Image
+
+#设置最大递归深度
 sys.setrecursionlimit(10000)
 
 def getPoint(x,y,data,subdata=None):

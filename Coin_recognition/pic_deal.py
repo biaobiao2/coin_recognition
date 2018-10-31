@@ -6,7 +6,10 @@ Created on 2018年10月29日
 '''
 
 import numpy as np
+from imutils import contours
+from imutils import perspective
 import cv2
+import imutils
 # from PIL import Image
 # import matplotlib.pyplot as plt
 
@@ -24,8 +27,6 @@ def hist():
     """
     img = cv2.imread(pic_path)
     hsv=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-#     print hsv
-#     pic_show(hsv)
     color=('b','g','r')
     
     for i,_ in enumerate(color):
@@ -36,15 +37,21 @@ def hist():
 #         plt.show()
 
 def colorpic2gray():
-    """图片二值化
+    """图片二值化，对白色区域处理成块，计算轮廓个数，既硬币数
+    @return: 硬币数目
     """   
     img = cv2.imread(pic_path)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+#     gray = gray/140
     #5×5 内核的高斯平滑
 #     gray = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     
+    #二值化
+    _, gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     
+    #边缘检测
+    thresh = cv2.Canny(gray, 50, 100)
+#     pic_show(thresh)
     #dilate:膨胀，erode:腐蚀白色区域
     img = thresh
 #     会返回指定形状和尺寸的结构元素
@@ -65,41 +72,42 @@ def colorpic2gray():
             print 'return threshold image'
         if k == ord('q'):
             break
-
+ 
     cv2.destroyAllWindows()
     
     
     #边缘检测 return 所处理的图像, 轮廓的点集,轮廓的索引
     _, hierarchy ,_ = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in hierarchy:
-#         M = cv2.moments(cnt)
-        #计算轮廓边长
-        Perimeter=cv2.arcLength(cnt,True)
-        if Perimeter > 100:
-            print Perimeter
+#     (cnts, _) = contours.sort_contours(hierarchy)
+#     
+#     for c in cnts:
+#         
+#         if cv2.contourArea(c) < 100:
+#             continue
+# #         print cv2.contourArea(c)
+#         orig = img.copy()
+#         box = cv2.minAreaRect(c)
+#         box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+#         print box
+#         box = np.array(box, dtype="int")
+#         box = perspective.order_points(box)
+#         cv2.drawContours(orig, [box.astype("int")], -1, (0, 255, 0), 2)
+#         
+#         for (x, y) in box:
+#             cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
+    
+        
+    return len(hierarchy)
  
 def on_trace_bar_changed(args):
     pass
 
-def cir_find():
-    img = cv2.imread(pic_path)
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    circles = cv2.HoughCircles(gray,cv2.HOUGH_GRADIENT,1,10)
-    circles = np.uint16(np.around(circles))
-    for i in circles[0,:]:
-        # draw the outer circle
-        cv2.circle(gray,(i[0],i[1]),i[2],(0,255,0),2)
-        # draw the center of the circle
-        cv2.circle(gray,(i[0],i[1]),2,(0,0,255),3)
 
-    cv2.imshow('detected circles',gray)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
     
 if __name__ == "__main__":
     print "start"
-    cir_find()
+    colorpic2gray()
 
     print "finish"
 
