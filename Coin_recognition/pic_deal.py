@@ -5,11 +5,7 @@ Created on 2018年10月29日
 @author: liushouhua
 '''
 
-import numpy as np
-from imutils import contours
-from imutils import perspective
 import cv2
-import imutils
 from threading import Thread
 # from PIL import Image
 # import matplotlib.pyplot as plt
@@ -17,11 +13,10 @@ from threading import Thread
 pic_path = "coin.jpg"
 
 def async(f):
-    def wrapper(*args, **kwargs):
+    def inner(*args, **kwargs):
         thr = Thread(target = f, args = args, kwargs = kwargs)
         thr.start()
-    return wrapper
-
+    return inner
 
 @async
 def pic_show(data):
@@ -40,7 +35,6 @@ def hist():
     
     for i,_ in enumerate(color):
         hist=cv2.calcHist([hsv],[i],None,[256],[0,256])
-#         pic_show(hist)
 #         plt.plot(hist)
 #         plt.xlim([0,256])
 #         plt.show()
@@ -51,16 +45,13 @@ def colorpic2gray():
     """   
     img = cv2.imread(pic_path)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-#     gray = gray/140
-    #5×5 内核的高斯平滑
-#     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     
     #二值化
     _, gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     
     #边缘检测
     thresh = cv2.Canny(gray, 50, 100)
-#     pic_show(thresh)
+
     #dilate:膨胀，erode:腐蚀白色区域
     img = thresh
 #     会返回指定形状和尺寸的结构元素
@@ -84,32 +75,12 @@ def colorpic2gray():
  
     cv2.destroyAllWindows()
     
-    
     #边缘检测 return 所处理的图像, 轮廓的点集,轮廓的索引
     _, hierarchy ,_ = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-#     (cnts, _) = contours.sort_contours(hierarchy)
-#     
-#     for c in cnts:
-#         
-#         if cv2.contourArea(c) < 100:
-#             continue
-# #         print cv2.contourArea(c)
-#         orig = img.copy()
-#         box = cv2.minAreaRect(c)
-#         box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
-#         print box
-#         box = np.array(box, dtype="int")
-#         box = perspective.order_points(box)
-#         cv2.drawContours(orig, [box.astype("int")], -1, (0, 255, 0), 2)
-#         
-#         for (x, y) in box:
-#             cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
-    
-        
+
     return len(hierarchy)
  
-def on_trace_bar_changed(args):
-    pass
+
 
 
 
