@@ -4,12 +4,15 @@ Created on 2018年10月29日
 
 @author: liushouhua
 '''
-
+import os
 import cv2
+import time
+import numpy as np
 from threading import Thread
 # from PIL import Image
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
+from coin_recognition import data_path
 pic_path = "coin.jpg"
 
 def async(f):
@@ -26,18 +29,52 @@ def pic_show(data):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def hist():
+def show_pic(data):
+    """显示图片的时间
+    """
+    pic_show(data)
+    time.sleep(1)
+    
+@async
+def hist_drw(img1):
+    plt.hist( img1, 256, [0, 256])
+    plt.show()
+
+def hist(img2):
     """直方图
     """
-    img = cv2.imread(pic_path)
-    hsv=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-    color=('b','g','r')
+#     img2= cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
+    value = 1000
+    pic_name = 0
+    hist_item1 = cv2.calcHist([img2],[0],None,[256],[0,255])
+    cv2.normalize(hist_item1,hist_item1,0,255,cv2.NORM_MINMAX)
+    for pic in os.listdir(data_path):
+        dirname = data_path + pic        
+        img1 = cv2.imread(dirname,0)
+        hist_item2 = cv2.calcHist([img1],[0],None,[256],[0,255])
+        cv2.normalize(hist_item2,hist_item2,0,255,cv2.NORM_MINMAX)
+        sc= cv2.compareHist(hist_item1, hist_item2, 0)
+        if sc <= value:
+            value = sc
+            pic_name = pic.strip().split(".")[0].split("-")[-1]
+        print sc
+        print pic
+        print np.array(img1.ravel()).mean()
+    return pic_name
+#         hist_drw(img1.ravel())
+#         time.sleep(0.3)
+        
+#         color = [ (255,0,0),(0,255,0),(0,0,255) ]
+#         
+#         for ch, col in enumerate(color):
+#             hist_item1 = cv2.calcHist([img1],[ch],None,[256],[0,255])
+#             hist_item2 = cv2.calcHist([img2],[ch],None,[256],[0,255])
+#             cv2.normalize(hist_item1,hist_item1,0,255,cv2.NORM_MINMAX)
+#             cv2.normalize(hist_item2,hist_item2,0,255,cv2.NORM_MINMAX)
+#             sc= cv2.compareHist(hist_item1, hist_item2, 0)
+#             print sc
+#         print pic    
     
-    for i,_ in enumerate(color):
-        hist=cv2.calcHist([hsv],[i],None,[256],[0,256])
-#         plt.plot(hist)
-#         plt.xlim([0,256])
-#         plt.show()
 
 def colorpic2gray():
     """图片二值化，对白色区域处理成块，计算轮廓个数，既硬币数
@@ -79,15 +116,13 @@ def colorpic2gray():
     _, hierarchy ,_ = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     return len(hierarchy)
- 
-
-
 
 
     
 if __name__ == "__main__":
     print "start"
-    colorpic2gray()
+    print "test-2-1-5.jpg".strip().split(".")[0].split("-")[-1]
+        
 
     print "finish"
 
