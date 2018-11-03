@@ -12,10 +12,7 @@ import cv2
 # import matplotlib.pyplot as plt
 
 from pic_deal import show_pic
-
-
-data_path = "D:\\workspace\\coin_recognition\\orbdata\\"
-
+from coin_recognition import data_path
 
 def testorb(img1,img2):
     """
@@ -29,8 +26,10 @@ def testorb(img1,img2):
 
     
 #     matches = bf.match(des1, des2)
+    
     matches = bf.knnMatch(des1, des2,1)
     matches = [j for i in matches for j in i]
+    
     matches = sorted(matches, key=lambda x: x.distance)
     img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches, img2, flags=2)
     show_pic(img3)
@@ -103,7 +102,7 @@ def orb_deal(cropImg):
 
 if __name__ == "__main__":
     print "start"
-    test = "test-1-1-1.jpg"
+
 
     print "finsh"
     

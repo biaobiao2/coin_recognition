@@ -33,7 +33,7 @@ def show_pic(data):
     """显示图片的时间
     """
     pic_show(data)
-    time.sleep(1)
+    time.sleep(0.2)
     
 @async
 def hist_drw(img1):
