@@ -2,7 +2,7 @@
 '''
 Created on 2018年10月29日
 
-@author: liushouhua
+@author: group
 '''
 import os
 import cv2
@@ -33,7 +33,7 @@ def show_pic(data):
     """显示图片的时间
     """
     pic_show(data)
-    time.sleep(0.2)
+    time.sleep(1)
     
 @async
 def hist_drw(img1):

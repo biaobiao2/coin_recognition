@@ -1,4 +1,4 @@
 matplotlib==2.2.2
 numpy==1.14.3
-opencv-python==3.4.2.17
+opencv-python==3.4.3.18
 Pillow==5.2.0
