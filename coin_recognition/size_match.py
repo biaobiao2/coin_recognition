@@ -135,6 +135,13 @@ def recognition():
         else:
             rad = reald2
         
+        if float(abs(reald1-rad)) / rad > 0.1 or float(abs(reald2-rad)) / rad > 0.1 :
+            #过滤不是圆形物体
+            continue
+        if rad >= 260 or 235 <= 150:
+            #过滤较小物体
+            continue
+        
         value = "unknown"
         if rad > 235:
             value = "1 yuan"
@@ -153,7 +160,6 @@ def recognition():
                     value =  "5 jiao"
             else:
                 value = str(value) + "jiao"
-#         break
         
         #照片/添加的文字/左上角坐标/字体/字体大小/颜色/字体粗细
         cv2.putText(orig,'%s'%(value),(midpoint1[0] - 10, midpoint1[1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
