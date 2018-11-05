@@ -35,15 +35,10 @@ def show_pic(data):
     pic_show(data)
     time.sleep(1)
     
-@async
-def hist_drw(img1):
-    plt.hist( img1, 256, [0, 256])
-    plt.show()
 
 def hist(img2):
     """直方图
     """
-#     img2= cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
     value = 1000
     pic_name = 0
     hist_item1 = cv2.calcHist([img2],[0],None,[256],[0,255])
@@ -61,11 +56,8 @@ def hist(img2):
         print pic
         print np.array(img1.ravel()).mean()
     return pic_name
-#         hist_drw(img1.ravel())
-#         time.sleep(0.3)
-        
+
 #         color = [ (255,0,0),(0,255,0),(0,0,255) ]
-#         
 #         for ch, col in enumerate(color):
 #             hist_item1 = cv2.calcHist([img1],[ch],None,[256],[0,255])
 #             hist_item2 = cv2.calcHist([img2],[ch],None,[256],[0,255])
@@ -75,6 +67,18 @@ def hist(img2):
 #             print sc
 #         print pic    
     
+def test():
+    for pic in os.listdir(data_path):
+        print pic
+        dirname = data_path + pic        
+        img = cv2.imread(dirname)
+        hsv=cv2.cvtColor(img,0)
+        color=('b','g','r')
+        for i,col in enumerate(color):
+            hist=cv2.calcHist([hsv],[i],None,[256],[0,256])
+            plt.plot(hist)
+            plt.xlim([0,256])
+            plt.show()
 
 def colorpic2gray():
     """图片二值化，对白色区域处理成块，计算轮廓个数，既硬币数
@@ -85,10 +89,8 @@ def colorpic2gray():
     
     #二值化
     _, gray = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-    
     #边缘检测
     thresh = cv2.Canny(gray, 50, 100)
-
     #dilate:膨胀，erode:腐蚀白色区域
     img = thresh
 #     会返回指定形状和尺寸的结构元素
@@ -109,21 +111,17 @@ def colorpic2gray():
             print 'return threshold image'
         if k == ord('q'):
             break
- 
     cv2.destroyAllWindows()
     
     #边缘检测 return 所处理的图像, 轮廓的点集,轮廓的索引
     _, hierarchy ,_ = cv2.findContours(img.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
     return len(hierarchy)
 
 
     
 if __name__ == "__main__":
     print "start"
-    print "test-2-1-5.jpg".strip().split(".")[0].split("-")[-1]
-        
-
+    test()
     print "finish"
 
     
