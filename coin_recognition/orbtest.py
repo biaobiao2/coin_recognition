@@ -8,7 +8,7 @@ Created on 2018年11月1日
 import os
 import cv2
 # import time
-# import numpy as np
+import numpy as np
 # import matplotlib.pyplot as plt
 
 from pic_deal import show_pic
@@ -85,6 +85,19 @@ def orb_deal(img):
 
 if __name__ == "__main__":
     print "start"
+    for pic in os.listdir(data_path):
+        pic_path = data_path + pic
+    picdata = cv2.imread(pic_path)
+    orb = cv2.ORB_create()
+    kp1, des1 = orb.detectAndCompute(picdata, None)
+    img3 = cv2.drawKeypoints(picdata, kp1, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+#     img3 = cv2.drawKeypoints(picdata, kp1, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DEFAULT)
+    
+    cv2.imshow('ret',img3)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+        
 #     sift=cv2.xfeatures2d.SIFT_create(355)
 
 
