@@ -14,6 +14,7 @@ sys.path.append('../')
 from coin_recognition import  pic_path
 from pic_deal import show_pic
 from coin_recognition.orbtest import orb_deal
+from coin_recognition.pHash_test import phash_match
 
 #参照物尺寸
 standard = 190
@@ -153,6 +154,11 @@ def recognition():
             orig1 = cv2.imread(pic_path)
             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
             value = orb_deal(cropImg)
+            
+#             #感知哈希
+#             orig1 = cv2.imread(pic_path,0)
+#             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
+#             value = phash_match(cropImg)
             if value == -1:
                 if abs(rad - 190) <= 13:
                     value =  "1 jiao"
