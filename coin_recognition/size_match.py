@@ -155,6 +155,7 @@ def recognition():
             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
             value = orb_deal(cropImg)
             
+            
             if value == -1:
                 #感知哈希
                 orig1 = cv2.imread(pic_path,0)
