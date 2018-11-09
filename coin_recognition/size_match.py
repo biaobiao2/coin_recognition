@@ -16,11 +16,6 @@ from pic_deal import show_pic
 from coin_recognition.orbtest import orb_deal
 from coin_recognition.pHash_test import phash_match
 
-#参照物尺寸
-standard = 190
-standard5 = 210
-# standard = 250
-
 
 def getDistanceByPosition(pointA,pointB):
     """获取直线距离
@@ -38,33 +33,37 @@ def deal_block(gray):
     @return ：处理后的图像数据，格式与输入保持一致
     """
     img = gray.copy()
-    img = cv2.dilate(img, None, iterations=1)
-    img = cv2.dilate(img, None, iterations=1)
-    img = cv2.dilate(img, None, iterations=1)
-    img = cv2.erode(img, None, iterations=1)
-    img = cv2.erode(img, None, iterations=1)
-    img = cv2.erode(img, None, iterations=1)
-#     while True:
-#         cv2.imshow("My", img)
-#         # 键盘检测函数，0xFF是因为64位机器
-#         k = cv2.waitKey(0) & 0xFF
-#         if k == ord('e'):
-#         # 加上iterations是为了记住这个参数，不加也行
-#             img = cv2.erode(img, None, iterations=1)
-#             print 'erode'
-#         if k == ord('d'):
-#             img = cv2.dilate(img, None, iterations=1)
-#             print 'dilate'
-#         if k == ord('r'):
-#             img = gray
-#             print 'return threshold image'
-#         if k == ord('q'):
-#             break
+#     img = cv2.dilate(img, None, iterations=1)
+#     img = cv2.dilate(img, None, iterations=1)
+#     img = cv2.dilate(img, None, iterations=1)
+#     img = cv2.erode(img, None, iterations=1)
+#     img = cv2.erode(img, None, iterations=1)
+#     img = cv2.erode(img, None, iterations=1)
+    while True:
+        cv2.imshow("My", img)
+        # 键盘检测函数，0xFF是因为64位机器
+        k = cv2.waitKey(0) & 0xFF
+        if k == ord('e'):
+            img = cv2.erode(img, None, iterations=1)
+            print 'erode'
+        if k == ord('d'):
+            img = cv2.dilate(img, None, iterations=1)
+            print 'dilate'
+        if k == ord('r'):
+            img = gray
+            print 'return image'
+        if k == ord('q'):
+            break
     return img
 
 def recognition():
     """
     """
+    #参照物尺寸
+    standard = 190
+    # standard = 210
+    # standard = 250
+    
     img0 = cv2.imread(pic_path)
     gray = cv2.cvtColor(img0,cv2.COLOR_BGR2GRAY)
     #高斯矩阵的尺寸(只能取奇数)越大，标准差越大，处理过的图像模糊程度越大
@@ -87,15 +86,16 @@ def recognition():
     red = (0, 0, 255)
     pink = (255, 0, 255)
     orig = img0.copy()
+    #用于画物体轮廓
+    orig0 = img0.copy()
     count = 0
     for c in cnts:
         if cv2.contourArea(c) < 200:
             #去除小轮廓
             continue
         
-        orig1 = img0.copy()
-        cv2.drawContours(orig1,[c],-1,(255,255,0),2)
-#         show_pic(orig1)
+        cv2.drawContours(orig0,[c],-1,(255,255,0),2)
+        show_pic(orig0)
         # 获取最小包围矩形
         rect = cv2.minAreaRect(c)
         box = cv2.boxPoints(rect) 
@@ -135,11 +135,11 @@ def recognition():
             rad = reald1
         else:
             rad = reald2
-        
-        if float(abs(reald1-rad)) / rad > 0.1 or float(abs(reald2-rad)) / rad > 0.1 :
+         
+        if float(abs(reald1-rad)) / rad > 0.1 or float(abs(reald2-rad)) / rad > 0.15 :
             #过滤不是圆形物体
             continue
-        if rad >= 260 or 235 <= 150:
+        if rad >= 270 or rad <= 130:
             #过滤较小物体
             continue
         
@@ -155,12 +155,14 @@ def recognition():
             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
             value = orb_deal(cropImg)
             
-#             #感知哈希
-#             orig1 = cv2.imread(pic_path,0)
-#             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
-#             value = phash_match(cropImg)
             if value == -1:
-                if abs(rad - 190) <= 13:
+                #感知哈希
+                orig1 = cv2.imread(pic_path,0)
+                cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
+                value = phash_match(cropImg)
+                
+            if value == -1:
+                if abs(rad - 190) <= 15:
                     value =  "1 jiao"
                 else:
                     value =  "5 jiao"
@@ -168,7 +170,7 @@ def recognition():
                 value = str(value) + "jiao"
         
         #照片/添加的文字/左上角坐标/字体/字体大小/颜色/字体粗细
-        cv2.putText(orig,'%s'%(value),(midpoint1[0] - 10, midpoint1[1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1)
+        cv2.putText(orig,'%s'%(value),(midpoint1[0] - 10, midpoint1[1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
         cv2.putText(orig,'%.1fmm'%(rad/10.0),(midpoint2[0] + 10, midpoint2[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
         show_pic(orig)
         count += 1
@@ -176,7 +178,6 @@ def recognition():
     cv2.putText(orig,'num of coin: %s'%(str(count)),(20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
     show_pic(orig)
         
-
     
 if __name__ == "__main__":
     print "start"

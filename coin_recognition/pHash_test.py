@@ -6,34 +6,31 @@ Created on 2018年11月8日
 '''
 
 """
-感知哈希算法(pHash) 相关博客:https://blog.csdn.net/sinat_26917383/article/details/70287521
+感知哈希算法(pHash) 相关https://blog.csdn.net/sinat_26917383/article/details/70287521
 """
 import os
 import cv2
-import sys
-import math
-import numpy as np
 
-from coin_recognition import  pic_path ,data_path
-from pic_deal import show_pic
-from coin_recognition.orbtest import orb_deal
+from coin_recognition import  data_path
+# from pic_deal import show_pic
 
 def pHash(img):
     """获取图片的哈希值"""
-    #加载并调整图片为32x32灰度图片
+    
 #     img=cv2.imread(img, 0) 
-    img=cv2.resize(img,(32,32),interpolation=cv2.INTER_CUBIC)
+    img=cv2.resize(img,(64,64),interpolation=cv2.INTER_CUBIC)
     vis0 = img.astype("float32")
     #二维Dct变换
     vis1 = cv2.dct(cv2.dct(vis0))
     
     size = 32  #该数的平方能被4整除
     vis1.resize(size,size)
+    
     #把二维list变成一维list
     img_list = []
     for item in vis1.tolist():
         img_list.extend(item)
-    #计算均值
+
     avg = float(sum(img_list))/len(img_list)
     avg_list = ['0' if i<avg else '1' for i in img_list]
     #得到哈希值
@@ -57,17 +54,22 @@ def phash_match(img):
     mon = ""
     for pic in os.listdir(data_path):
         va = pic.strip().split(".")[0][-1]
-        HASH1 = pHash(data_path + pic)
+        img1=cv2.imread(data_path + pic, 0)
+        HASH1 = pHash(img1)
         out_score,length = hammingDist(HASH1,HASH0)
         sco = float(out_score)/length
         if float(out_score)/length >= score:
             score = sco
             mon = va
-    return mon
+    if score > 0.5:
+        return mon
+    else:
+        return -1
 
 if __name__ == "__main__":
     print "start"
-    HASH0 = pHash("test_1_1.jpg" )
+    img0=cv2.imread("test_1_1.jpg", 0) 
+    HASH0 = pHash(img0 )
     for pic in os.listdir(data_path):
         img=cv2.imread(data_path + pic, 0)
         HASH1 = pHash(img)

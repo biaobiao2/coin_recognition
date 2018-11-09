@@ -25,7 +25,9 @@ def async(f):
 def pic_show(data):
     """显示图片
     """
-    cv2.imshow('ret',data)
+    cv2.namedWindow("show",0)
+    cv2.resizeWindow("show", 500, 640)
+    cv2.imshow('show',data)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -33,7 +35,7 @@ def show_pic(data):
     """显示图片的时间
     """
     pic_show(data)
-    time.sleep(1)
+    time.sleep(0.1)
     
 
 def hist(img2):
@@ -74,7 +76,7 @@ def test():
         img = cv2.imread(dirname)
         hsv=cv2.cvtColor(img,0)
         color=('b','g','r')
-        for i,col in enumerate(color):
+        for i,_ in enumerate(color):
             hist=cv2.calcHist([hsv],[i],None,[256],[0,256])
             plt.plot(hist)
             plt.xlim([0,256])
