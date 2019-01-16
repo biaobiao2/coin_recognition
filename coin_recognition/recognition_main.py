@@ -4,16 +4,16 @@ Created on 2018年10月31日
 
 @author: group
 '''
-
+import os
 import cv2
 import sys
 import math
+import time
 import numpy as np
+from threading import Thread
 sys.path.append('../')
 
-from coin_recognition import  pic_path
-from pic_deal import show_pic
-from coin_recognition.orbtest import orb_deal
+from coin_recognition import  pic_path, data_path
 from coin_recognition.pHash_test import phash_match
 
 
@@ -23,7 +23,7 @@ def getDistanceByPosition(pointA,pointB):
     return math.sqrt(pow(pointA[0] - pointB[0],2)+pow(pointA[1] - pointB[1],2))
 
 def getMidPoint(pointA, pointB):
-    """返回中心点
+    """返回线段中心点
     """
     return (int((pointA[0] + pointB[0]) * 0.5), int((pointA[1] + pointB[1]) * 0.5))
 
@@ -33,12 +33,7 @@ def deal_block(gray):
     @return ：处理后的图像数据，格式与输入保持一致
     """
     img = gray.copy()
-#     img = cv2.dilate(img, None, iterations=1)
-#     img = cv2.dilate(img, None, iterations=1)
-#     img = cv2.dilate(img, None, iterations=1)
-#     img = cv2.erode(img, None, iterations=1)
-#     img = cv2.erode(img, None, iterations=1)
-#     img = cv2.erode(img, None, iterations=1)
+
     while True:
         cv2.imshow("My", img)
         # 键盘检测函数，0xFF是因为64位机器
@@ -56,14 +51,10 @@ def deal_block(gray):
             break
     return img
 
-def recognition():
+def recognition(standard):
+    """硬币识别主函数
+    @param standard: float 待处理图像最左边物体尺寸 单位:mm
     """
-    """
-    #参照物尺寸
-    standard = 190
-    # standard = 210
-    # standard = 250
-    
     img0 = cv2.imread(pic_path)
     gray = cv2.cvtColor(img0,cv2.COLOR_BGR2GRAY)
     #高斯矩阵的尺寸(只能取奇数)越大，标准差越大，处理过的图像模糊程度越大
@@ -155,14 +146,13 @@ def recognition():
             cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
             value = orb_deal(cropImg)
             
-            
-            if value == -1:
+            if value is None:
                 #感知哈希
                 orig1 = cv2.imread(pic_path,0)
                 cropImg = orig1[Xmin:Xmax,Ymin:Ymax]
                 value = phash_match(cropImg)
                 
-            if value == -1:
+            if value is None:
                 if abs(rad - 190) <= 15:
                     value =  "1 jiao"
                 else:
@@ -179,10 +169,72 @@ def recognition():
     cv2.putText(orig,'num of coin: %s'%(str(count)),(20,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
     show_pic(orig)
         
+def async(f):
+    def inner(*args, **kwargs):
+        thr = Thread(target = f, args = args, kwargs = kwargs)
+        thr.start()
+    return inner
+
+@async
+def pic_show(data):
+    """显示图片
+    """
+    cv2.namedWindow("show",0)
+    cv2.resizeWindow("show", 500, 640)
+    cv2.imshow('show',data)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def show_pic(data):
+    """显示图片的时间
+    """
+    pic_show(data)
+    time.sleep(0.1)
+
+def orb_match(img1,img2):
+    """orb 特征匹配
+    @param img1,img2: 格式保持一致的图片data
+    @return 匹配距离小于一定值的特征数目
+    """
+    #最大特征点数,可以修改，
+    orb = cv2.ORB_create(5000)
+    kp1, des1 = orb.detectAndCompute(img1, None)
+    kp2, des2 = orb.detectAndCompute(img2, None)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     
+    matches = bf.match(des1, des2)
+    
+    matches = sorted(matches, key=lambda x: x.distance,reverse = False)
+    img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches, img2, flags=2)
+    show_pic(img3)
+    matches = [i for i in matches if i.distance <= 50]
+    return len(matches) 
+
+
+def orb_deal(img):
+    """将读入图片与样本数据进行orb图像匹配，找到最相似的一张
+    @param param: 
+    @return: 最可能的图像硬币价值，none代表与样本数据都不匹配
+    """
+    matchs = 0
+    for pic in os.listdir(data_path):
+        dirname = data_path + pic
+        picdata = cv2.imread(dirname)
+        match_value =  orb_match(img,picdata)
+#         break
+        if match_value >= matchs:
+            matchs = match_value
+            matchs_value = pic.strip().split(".")[0][-1]
+    if matchs > 25:
+        return matchs_value
+    else:
+        return None
+
 if __name__ == "__main__":
     print "start"
-    recognition()
+    #参照物半径尺寸,需要人工给出
+    standard = float(sys.argv[1])
+    recognition(standard)
     print "finsh"
     
     

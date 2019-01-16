@@ -12,7 +12,6 @@ import os
 import cv2
 
 from coin_recognition import  data_path
-# from pic_deal import show_pic
 
 def pHash(img):
     """获取图片的哈希值"""
@@ -64,22 +63,6 @@ def phash_match(img):
     if score > 0.5:
         return mon
     else:
-        return -1
-
-if __name__ == "__main__":
-    print "start"
-    img0=cv2.imread("test_1_1.jpg", 0) 
-    HASH0 = pHash(img0 )
-    for pic in os.listdir(data_path):
-        img=cv2.imread(data_path + pic, 0)
-        HASH1 = pHash(img)
-#         out_score = 1 - hammingDist(HASH1,HASH0)*1. / (32*32/4)
-        out_score,length = hammingDist(HASH1,HASH0)
-        print pic,float(out_score)/length
-        
-        
-        
-        
-        
+        return None
 
     
